@@ -3,7 +3,7 @@ import requests
 import time
 import datetime
 from datetime import datetime
-import os
+from twilio.rest import Client
 
 # Key:  5e44fc29c13dfab6ac38068d3243692c
 # Secret: 647eec5fe66142ef62122b7628b054d0
@@ -51,26 +51,36 @@ for element in judithForecast:
 for timeStamp in times:
 	date = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(timeStamp))
 
-
+judithHits = []
 def printJudithForecast():
 	for e in judithForecast:
-		if e['localTimestamp'] > dateUnix:
-			locTime = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(e['localTimestamp']))
-			minHeight = e['swell']['absMinBreakingHeight']
-			maxHeight = e['swell']['absMaxBreakingHeight']
-			if minHeight >= 2:
-				print("it's time to go! the min is {} and the max is {} on {}".format(minHeight, maxHeight, locTime))
+		minHeight = e['swell']['absMinBreakingHeight']
+		maxHeight = e['swell']['absMaxBreakingHeight']
+		if minHeight >= 2 and todayUTC < e['localTimestamp']:
+			judithHits.append(
+				{
+					"waveMax" : maxHeight,
+					"waveMin": minHeight,
+					"temp": e['condition']['temperature'],
+					"time": time.strftime('%Y-%m-%d %l:%M %p', time.localtime(e['localTimestamp']))
+				}
+			)
 			
 
-
+wallHits = []
 def printTheWallForecast():
 	for e in theWallForecast:
-		if e['localTimestamp'] > dateUnix:
-			locTime = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(e['localTimestamp']))
-			minHeight = e['swell']['absMinBreakingHeight']
-			maxHeight = e['swell']['absMaxBreakingHeight']
-			if minHeight >= 2:
-				print("it's time to go! the min is {} and the max is {} on {}".format(minHeight, maxHeight, locTime))		
+		minHeight = e['swell']['absMinBreakingHeight']
+		maxHeight = e['swell']['absMaxBreakingHeight']
+		if minHeight >= 2 and todayUTC < e['localTimestamp']:
+			wallHits.append(
+				{
+					"waveMax" : maxHeight,
+					"waveMin": minHeight,
+					"temp": e['condition']['temperature'],
+					"time": time.strftime('%Y-%m-%d %l:%M %p', time.localtime(e['localTimestamp']))
+				}
+			)	
 
 
 
@@ -79,3 +89,26 @@ printTheWallForecast()
 
 print(todaysDate)
 print(dateUnix)
+
+if len(wallHits) == 0:
+	print ("no wall surf")
+if len(judithHits) == 0:
+	print ("no judith surf")
+
+
+
+#Twilio Code below for texting
+
+# Your Account SID from twilio.com/console
+account_sid = "AC52873c608f5896ae7b8a47247d4c0693"
+# Your Auth Token from twilio.com/console
+auth_token  = "e146ac7bd4223225b36f1bc7acd4765a"
+
+client = Client(account_sid, auth_token)
+
+message = client.messages.create(
+    to="+18434226842", 
+    from_="+17075129228",
+    body="Hello from Python!")
+
+print(message.sid)
