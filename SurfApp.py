@@ -5,9 +5,8 @@ import datetime
 from datetime import datetime
 from twilio.rest import Client
 import os
+import config
 
-# Key:  5e44fc29c13dfab6ac38068d3243692c
-# Secret: 647eec5fe66142ef62122b7628b054d0
 # Documentation can be found here: http://magicseaweed.com/developer/forecast-api
 # Here's an example URL showing the forecast for The Wall: http://magicseaweed.com/api/5e44fc29c13dfab6ac38068d3243692c/forecast/?spot_id=369
 
